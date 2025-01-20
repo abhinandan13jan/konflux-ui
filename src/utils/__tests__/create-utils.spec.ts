@@ -1,22 +1,27 @@
-import { omit } from 'lodash-es';
-import { THUMBNAIL_ANNOTATION } from '../../components/ApplicationThumbnail';
+import {
+  addSecretFormValues,
+  mockApplicationRequestData,
+  mockComponent,
+  mockComponentData,
+  mockComponentDataWithDevfile,
+  mockComponentDataWithoutAnnotation,
+  mockComponentDataWithPAC,
+  mockComponentWithDevfile,
+  secretFormValues,
+} from '../../components/Secrets/__data__/mock-secrets';
 import { linkSecretToServiceAccount } from '../../components/Secrets/utils/service-account-utils';
 import { commonFetch } from '../../k8s/fetch';
 import { k8sCreateResource, k8sUpdateResource } from '../../k8s/k8s-fetch';
+import { SecretModel } from '../../models';
 import { ApplicationModel } from '../../models/application';
 import { ComponentModel } from '../../models/component';
-import {
-  AddSecretFormValues,
-  SecretFor,
-  SecretTypeDropdownLabel,
-  SourceSecretType,
-} from '../../types';
-import { ComponentKind, ComponentSpecs } from '../../types/component';
+import { SecretTypeDropdownLabel, SourceSecretType } from '../../types';
 import {
   createApplication,
   createComponent,
   sanitizeName,
   createSecret,
+  getSecretObject,
   addSecret,
 } from '../create-utils';
 import { mockWindowFetch } from '../test-utils';
@@ -51,123 +56,6 @@ jest.mock('../../components/ApplicationThumbnail', () => {
   return { ...actual, getRandomSvgNumber: () => 7 };
 });
 
-const mockApplicationRequestData = {
-  apiVersion: `${ApplicationModel.apiGroup}/${ApplicationModel.apiVersion}`,
-  kind: ApplicationModel.kind,
-  metadata: {
-    name: 'test-application',
-    namespace: 'test-ns',
-    annotations: {
-      [THUMBNAIL_ANNOTATION]: '7',
-    },
-  },
-  spec: {
-    displayName: 'test-application',
-  },
-};
-
-const mockComponent: ComponentSpecs = {
-  componentName: 'Test Component',
-  application: 'test-application',
-  source: {
-    git: {
-      url: 'http://github.com/test-repo',
-    },
-  },
-};
-
-const mockComponentWithDevfile = {
-  ...mockComponent,
-  source: {
-    git: {
-      ...mockComponent.source.git,
-      devfileUrl: 'https://registry.devfile.io/sample-devfile',
-    },
-  },
-};
-
-const mockComponentData: ComponentKind = {
-  apiVersion: `${ComponentModel.apiGroup}/${ComponentModel.apiVersion}`,
-  kind: ComponentModel.kind,
-  metadata: {
-    name: 'test-component',
-    namespace: 'test-ns',
-    annotations: {
-      'build.appstudio.openshift.io/request': 'configure-pac',
-    },
-  },
-  spec: {
-    componentName: mockComponent.componentName,
-    application: 'test-application',
-    source: {
-      git: { url: mockComponent.source.git.url },
-    },
-    containerImage: undefined,
-    env: undefined,
-    replicas: undefined,
-    resources: undefined,
-    secret: undefined,
-  },
-};
-
-const mockComponentDataWithDevfile: ComponentKind = {
-  ...mockComponentData,
-  spec: {
-    ...mockComponentData.spec,
-    source: {
-      git: {
-        url: mockComponent.source.git.url,
-        devfileUrl: 'https://registry.devfile.io/sample-devfile',
-      },
-    },
-  },
-};
-
-const mockComponentDataWithoutAnnotation = omit(
-  mockComponentDataWithDevfile,
-  'metadata.annotations',
-);
-
-const mockComponentDataWithPAC = {
-  ...mockComponentDataWithDevfile,
-  metadata: {
-    ...mockComponentDataWithDevfile.metadata,
-    annotations: {
-      'build.appstudio.openshift.io/request': 'configure-pac',
-    },
-  },
-};
-
-const addSecretFormValues: AddSecretFormValues = {
-  type: 'Image pull secret',
-  name: 'test',
-  secretFor: SecretFor.Build,
-  opaque: {
-    keyValues: [
-      {
-        key: 'test',
-        value: 'dGVzdA==',
-      },
-    ],
-  },
-  image: {
-    authType: 'Image registry credentials',
-    registryCreds: [
-      {
-        registry: 'test.io',
-        username: 'test',
-        password: 'test',
-        email: 'test@test.com',
-      },
-    ],
-  },
-  source: {
-    authType: 'Basic authentication',
-    username: 'test',
-    password: 'test',
-  },
-  labels: [{ key: 'test', value: 'test' }],
-};
 describe('Create Utils', () => {
   beforeEach(() => {
     mockWindowFetch();
@@ -656,5 +544,21 @@ describe('Create Utils', () => {
       'test-ns',
       'test-ws',
     );
+  });
+});
+
+describe('create-utils getSecretObject', () => {
+  beforeEach(() => {
+    mockWindowFetch();
+  });
+
+  it('should create a secret object', () => {
+    const obj = getSecretObject(secretFormValues, 'test-ns');
+    expect(obj.kind).toBe(SecretModel.kind);
+  });
+
+  it('should create a correct fields', () => {
+    const obj = getSecretObject(secretFormValues, 'test-ns');
+    expect(obj.stringData).toEqual({ test: 'dGVzdA==' });
   });
 });
