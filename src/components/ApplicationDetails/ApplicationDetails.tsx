@@ -21,6 +21,7 @@ import DetailsPage from '../DetailsPage/DetailsPage';
 import { useModalLauncher } from '../modal/ModalProvider';
 import { applicationDeleteModal } from '../modal/resource-modals';
 import { ApplicationHeader } from './ApplicationHeader';
+import { ChatContainer } from './ChatContainer';
 
 import './ApplicationDetails.scss';
 
@@ -69,6 +70,9 @@ export const ApplicationDetails: React.FC<React.PropsWithChildren> = () => {
 
   return (
     <React.Fragment>
+      <div className="application-details__chat-container">
+        <ChatContainer />
+      </div>
       <DetailsPage
         data-test="application-details-test-id"
         headTitle={appDisplayName}

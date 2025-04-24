@@ -4,4 +4,15 @@
     flex-direction: column;
     flex: 1;
   }
+  &__chat-container {
+
+    & .rcb-chat-window {
+      position: fixed;
+      bottom: 0;
+      right: 100px;
+      z-index: 100;
+      max-width: 400px;
+      max-height: 800px;
+    }
+  }
 }

@@ -47,6 +47,17 @@ export default merge(commonConfig, {
         // pathRewrite: { '^/api/k8s/registration': '' },
       },
       {
+        context: (path) => path.includes('/whatsonX'),
+        target:
+          'https://api.au-syd.assistant.watson.cloud.ibm.com/instances/b5b93c65-45e1-4157-a0ff-d963c469c6db',
+        secure: false,
+        changeOrigin: true,
+        autoRewrite: true,
+        ws: true,
+        toProxy: true,
+        pathRewrite: { '^/whatsonX': '' },
+      },
+      {
         context: (path) => path.includes('/api/k8s'),
         target: process.env.PROXY_URL,
         secure: false,
