@@ -1,0 +1,28 @@
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  labels:
+    test.appstudio.openshift.io/optional: 'false'
+  name: konflux-ui-e2e
+spec:
+  application: abhindas-konflux
+  contexts:
+    - description: execute the integration test in all cases - this would be the default state
+      name: application
+    - description: execute the integration test for a Snapshot created for a `pull request` event
+      name: pull_request
+  params:
+    - name: konflux-test-infra-secret
+      value: konflux-test-infra
+    - name: cloud-credential-key
+      value: rhtap-cloud-credentials-us-east-1
+  resolverRef:
+    params:
+      - name: url
+        value: https://github.com/abhinandan13jan/konflux-ui/tree/add-e2e-workflow
+      - name: revision
+        value: main
+      - name: pathInRepo
+        value: integration-test/pipelines/e2e-main-pipeline.yaml
+    resolver: git
+    resourceKind: pipeline

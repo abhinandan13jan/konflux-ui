@@ -1,0 +1,45 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: e2e-main-pipeline
+  namespace: abhindas-tenant
+  labels:
+    appstudio.openshift.io/component: abhind
+    appstudio.openshift.io/application: tssc-cli
+spec:
+  params:
+    - name: SNAPSHOT
+      description: 'The JSON string representing the snapshot of the application under test.'
+      default: '{"components": [{"name":"test-app", "containerImage": "quay.io/example/repo:latest"}]}'
+      type: string
+    - name: konflux-test-infra-secret
+      description: The name of secret where testing infrastructures credentials are stored.
+      type: string
+    - name: cloud-credential-key
+      description: The key secret from konflux-test-infra-secret where all AWS ROSA configurations are stored.
+      type: string
+    - name: ocp-instance-type
+      description: 'The type of machine to use for the cluster nodes.'
+      default: 'm5.2xlarge'
+      type: string
+    - name: ocp-replicas
+      description: 'The number of replicas for the cluster nodes.'
+      default: '3'
+      type: string
+  tasks:
+    - name: test-metadata
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/konflux-ci/tekton-integration-catalog.git
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/test-metadata/0.2/test-metadata.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+        - name: test-name
+          value: $(context.pipelineRun.name)
