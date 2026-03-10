@@ -5,7 +5,8 @@ import {
   ComponentDetailsTab,
   ComponentDetailsViewLayout,
   componentDetailsViewLoader,
-} from '../../components/ComponentsPage/ComponentDetails';
+} from '~/components/ComponentsPage/ComponentDetails';
+import { ActivityTabV2 } from '~/shared/components/activity-tab/ActivityTabV2';
 import { COMPONENT_DETAILS_V2_PATH, COMPONENTS_PATH } from '../paths';
 
 const componentsPageRoutes = [
@@ -32,7 +33,7 @@ const componentsPageRoutes = [
       },
       {
         path: 'activity',
-        element: null, // TODO: implement Activity tab https://issues.redhat.com/browse/KFLUXUI-1006
+        element: <ActivityTabV2 />,
       },
       {
         path: `versions`,
