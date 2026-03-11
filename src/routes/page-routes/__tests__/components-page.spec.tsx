@@ -1,4 +1,5 @@
 import React from 'react';
+import { ComponentVersionsTab } from '~/components/ComponentsPage/tabs/ComponentVersionsTab';
 import {
   ComponentDetailsTab,
   ComponentDetailsViewLayout,
